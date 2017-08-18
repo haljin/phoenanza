@@ -20,7 +20,7 @@ defmodule PhoenanzaWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", PhoenanzaWeb do
-  #   pipe_through :api
-  # end
+  scope "/api/v1", PhoenanzaWeb do
+    pipe_through :api
+  end
 end
