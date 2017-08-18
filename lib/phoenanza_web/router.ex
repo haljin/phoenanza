@@ -22,5 +22,7 @@ defmodule PhoenanzaWeb.Router do
   # Other scopes may use custom stacks.
   scope "/api/v1", PhoenanzaWeb do
     pipe_through :api
+
+    resources "/users", UserController, except: [:new, :edit]
   end
 end

@@ -13,13 +13,13 @@ export default class UserTestButton extends React.Component<any, {text: string}>
 
   sendPostRequest() {
     let xhr = new XMLHttpRequest();
-    xhr.open('POST', './api/v1/user', true);
+    xhr.open('POST', './api/v1/users', true);
     xhr.setRequestHeader('Content-type', 'application/json');
     
     xhr.onreadystatechange = () => {
       console.log(xhr.responseText);
     }
-    xhr.send(JSON.stringify({name: "TestName"}))
+    xhr.send(JSON.stringify({user: {name: "TestName"}}))
 
 
   }
