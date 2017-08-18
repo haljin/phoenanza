@@ -1,11 +1,13 @@
 defmodule Phoenanza.Repo do
   use Ecto.Repo, otp_app: :phoenanza
+  require Logger
 
   @doc """
   Dynamically loads the repository url from the
   DATABASE_URL environment variable.
   """
   def init(_, opts) do
-    {:ok, Keyword.put(opts, :url, System.get_env("DATABASE_URL"))}
+    Logger.info("Starting Phoenanza.Repo")
+    {:ok, opts}
   end
 end

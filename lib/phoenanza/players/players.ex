@@ -6,7 +6,6 @@ defmodule Phoenanza.Players do
 
   import Ecto.Query, warn: false
   alias Phoenanza.Repo
-
   alias Phoenanza.Players.User
 
   @doc """
@@ -51,9 +50,9 @@ defmodule Phoenanza.Players do
 
   """
   def create_user(attrs \\ %{}) do
-    {:ok, User.build(%User{}, attrs)}
-    # |> (fn(user) -> {:ok, user} end).()
-    # |> Repo.insert()
+    %User{}
+    |> User.changeset(attrs)
+    |> Repo.insert()
   end
 
   @doc """

@@ -2,7 +2,7 @@ defmodule Phoenanza.PlayersTest do
   use Phoenanza.DataCase
 
   alias Phoenanza.Players
-
+  
   describe "users" do
     alias Phoenanza.Players.User
 

@@ -25,13 +25,9 @@ defmodule PhoenanzaWeb.ChannelCase do
     end
   end
 
-
-  setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Phoenanza.Repo)
-    unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(Phoenanza.Repo, {:shared, self()})
-    end
+  setup _tags do
     :ok
   end
+
 
 end

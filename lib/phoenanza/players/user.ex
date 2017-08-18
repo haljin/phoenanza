@@ -3,11 +3,17 @@ defmodule Phoenanza.Players.User do
   import Ecto.Changeset
   alias Phoenanza.Players.User
 
-  defstruct name: "", id: nil
 
+  schema "users" do
+    field :name, :string
+
+    timestamps()
+  end
 
   @doc false
-  def build(%User{} = user, %{"name" => name}) do
-    %User{user | name: name, id: String.to_atom(name)}
+  def changeset(%User{} = user, attrs) do
+    user
+    |> cast(attrs, [:name])
+    |> validate_required([:name])
   end
 end

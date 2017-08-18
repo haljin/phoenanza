@@ -8,6 +8,7 @@ use Mix.Config
 # General application configuration
 config :phoenanza,
   ecto_repos: [Phoenanza.Repo]
+  # ecto_repos: []
 
 # Configures the endpoint
 config :phoenanza, PhoenanzaWeb.Endpoint,
