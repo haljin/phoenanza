@@ -1,5 +1,6 @@
 defmodule Phoenanza.PlayersTest do
   use Phoenanza.DataCase
+  require Logger
 
   alias Phoenanza.Players
   
@@ -12,7 +13,7 @@ defmodule Phoenanza.PlayersTest do
 
     def user_fixture(attrs \\ %{}) do
       {:ok, user} =
-        attrs
+        attrs 
         |> Enum.into(@valid_attrs)
         |> Players.create_user()
 

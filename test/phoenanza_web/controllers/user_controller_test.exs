@@ -20,7 +20,7 @@ defmodule PhoenanzaWeb.UserControllerTest do
   describe "index" do
     test "lists all users", %{conn: conn} do
       conn = get conn, user_path(conn, :index)
-      assert json_response(conn, 200)["data"] == []
+      assert is_list json_response(conn, 200)["data"]
     end
   end
 
