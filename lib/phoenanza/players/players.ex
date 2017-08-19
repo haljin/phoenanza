@@ -3,7 +3,8 @@ defmodule Phoenanza.Players do
   @moduledoc """
   The Players context.
   """
-  
+
+  import Ecto.Query, warn: false
   alias Phoenanza.Repo
   alias Phoenanza.Players.User
 
@@ -100,4 +101,6 @@ defmodule Phoenanza.Players do
   def change_user(%User{} = user) do
     User.changeset(user, %{})
   end
+
+  alias Phoenanza.Players.User
 end

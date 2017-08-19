@@ -1,6 +1,5 @@
 defmodule PhoenanzaWeb.UserController do
   use PhoenanzaWeb, :controller
-  require Logger
 
   alias Phoenanza.Players
   alias Phoenanza.Players.User

@@ -28,7 +28,12 @@ defmodule PhoenanzaWeb.ConnCase do
 
 
 
-  setup _tags do
+
+  setup tags do
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Phoenanza.Repo)
+    unless tags[:async] do
+      Ecto.Adapters.SQL.Sandbox.mode(Phoenanza.Repo, {:shared, self()})
+    end
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 
