@@ -1,13 +1,22 @@
 defmodule Phoenanza.Repo do
-  use Ecto.Repo, otp_app: :phoenanza
+  use GenServer
+  # @behaviour Ecto.Repo
   require Logger
 
-  @doc """
-  Dynamically loads the repository url from the
-  DATABASE_URL environment variable.
-  """
-  def init(_, opts) do
+  alias Phoenanza.Players.User
+
+  def start_link(opts \\ []) do
+    GenServer.start_link(__MODULE__, opts, name: __MODULE__)
+  end
+
+  def init(opts) do
     Logger.info("Starting Phoenanza.Repo")
+    :ets.new(User, [:set, :public, :named_table, read_concurrency: true])
     {:ok, opts}
   end
+  
+
+
+
+
 end

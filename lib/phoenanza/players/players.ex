@@ -3,8 +3,7 @@ defmodule Phoenanza.Players do
   @moduledoc """
   The Players context.
   """
-
-  import Ecto.Query, warn: false
+  
   alias Phoenanza.Repo
   alias Phoenanza.Players.User
 
