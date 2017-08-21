@@ -39,6 +39,14 @@ defmodule Phoenanza.PlayersTest do
       assert {:error, %Ecto.Changeset{}} = Players.create_user(@invalid_attrs)
     end
 
+    test "Users are unique" do
+      user = user_fixture()
+      assert {:error, %Ecto.Changeset{}} =  %{} 
+                                            |> Enum.into(@valid_attrs)
+                                            |> Players.create_user()
+      
+    end
+
     test "update_user/2 with valid data updates the user" do
       user = user_fixture()
       assert {:ok, user} = Players.update_user(user, @update_attrs)

@@ -1,14 +1,27 @@
 import * as React from "react"
 
-export default class UserTestButton extends React.Component<any, {text: string}> {
-  constructor() {
-    super();
-    this.state = {text: "Click me"}
-  } 
+export interface UserEntryFormProps {stateChange(): void}
+type UserData = {value: string, submitted: boolean}
 
-  onClick() {
-    this.sendPostRequest();
-    this.setState({text: "Clicked!"})
+export default class UserEntryForm extends React.Component<UserEntryFormProps, UserData> {
+  constructor(props) {
+    super(props);
+    this.state = {value: '', submitted: false};
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleSubmit(event) {
+    if (this.state.value != "") {
+      this.sendPostRequest();
+      event.preventDefault()
+      this.setState({submitted: true})
+    }
+  }
+
+  handleChange(event) {
+    this.setState({value: event.target.value});
   }
 
   sendPostRequest() {
@@ -16,19 +29,29 @@ export default class UserTestButton extends React.Component<any, {text: string}>
     xhr.open('POST', './api/v1/users', true);
     xhr.setRequestHeader('Content-type', 'application/json');
     
-    xhr.onreadystatechange = () => {
-      console.log(xhr.responseText);
+    xhr.onreadystatechange = () => { 
+      if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 201) {
+        console.log(xhr.responseText);
+        this.submitDone()
+      }
+      else if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 422) 
+        alert("User name already taken!")
     }
-    xhr.send(JSON.stringify({user: {name: "TestName"}}))
+    xhr.send(JSON.stringify({user: {name: this.state.value}}))
+  }
 
-
+  submitDone() {
+    this.props.stateChange()
   }
 
   render() {
-      return (<button onClick={() => this.onClick()}> 
-                      {this.state.text}
-              </button>)
-
+    return (<form onSubmit={this.handleSubmit}>
+      <label>
+        Name: 
+        <input type="text" value={this.state.value} onChange={this.handleChange} />
+      </label>
+      <input type="submit" value="Submit" />
+    </form>)
   }
 }
 

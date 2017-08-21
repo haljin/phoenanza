@@ -9,12 +9,12 @@ import "phoenix_html"
 // import socket from "./socket"
 import * as React from "react"
 import * as ReactDOM from "react-dom"
-import UserTestButton from "./entry"
+import PhoenanzaMain from "./phoenanza-main"
 
 function render(node) {
     ReactDOM.render(
         (<div>
-          <UserTestButton/>
+          <PhoenanzaMain/>
          </div>),
         node
     )
