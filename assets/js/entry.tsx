@@ -34,7 +34,7 @@ export default class UserEntryForm extends React.Component<UserEntryFormProps, U
         this.submitDone(JSON.parse(xhr.response).data.id)
       }
       else if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 422) 
-        this.submitDone(JSON.parse(xhr.response).data.id)
+        console.log("User already exists :(")
     }
     xhr.send(JSON.stringify({user: {name: this.state.value}}))
   }
@@ -44,7 +44,8 @@ export default class UserEntryForm extends React.Component<UserEntryFormProps, U
   }
 
   render() {
-    return (<form onSubmit={this.handleSubmit}>
+    return (
+    <form onSubmit={this.handleSubmit}>
       <label>
         Name: 
         <input type="text" value={this.state.value} onChange={this.handleChange} />
