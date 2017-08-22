@@ -30,6 +30,11 @@ defmodule Phoenanza.PlayersTest do
       assert Players.get_user!(user.id) == user
     end
 
+    test "get_user_by_name/1 returns the user by given name" do
+      _user = user_fixture()
+      assert Players.get_user_by_name("some name")
+    end
+
     test "create_user/1 with valid data creates a user" do
       assert {:ok, %User{} = user} = Players.create_user(@valid_attrs)
       assert user.name == "some name"
@@ -40,7 +45,7 @@ defmodule Phoenanza.PlayersTest do
     end
 
     test "Users are unique" do
-      user = user_fixture()
+      _user = user_fixture()
       assert {:error, %Ecto.Changeset{}} =  %{} 
                                             |> Enum.into(@valid_attrs)
                                             |> Players.create_user()

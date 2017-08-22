@@ -1,8 +1,9 @@
 defmodule PhoenanzaWeb.UserSocket do
   use Phoenix.Socket
+  require Logger
 
   ## Channels
-  # channel "room:*", PhoenanzaWeb.RoomChannel
+  channel "room:*", PhoenanzaWeb.LobbyChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket
@@ -19,7 +20,8 @@ defmodule PhoenanzaWeb.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
-  def connect(_params, socket) do
+  def connect(params, socket) do
+    Logger.info("SOCKET: #{inspect params}")
     {:ok, socket}
   end
 

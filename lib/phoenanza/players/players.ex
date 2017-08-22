@@ -37,6 +37,10 @@ defmodule Phoenanza.Players do
   """
   def get_user!(id), do: Repo.get!(User, id)
 
+
+  def get_user_by_name(name) when not is_nil(name), do: Repo.get_by(User, name: name) 
+  def get_user_by_name(_), do: {:error, :no_user}
+
   @doc """
   Creates a user.
 

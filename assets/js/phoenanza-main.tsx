@@ -1,23 +1,24 @@
 import * as React from "react"
 import UserEntryForm from "./entry"
+import Lobby from "./lobby"
 
 var stateEnum = {WAITING_FOR_NAME: 0, CONNECTING: 1}
 
-export default class PhoenanzaMain extends React.Component<any, {state: number}> {
+export default class PhoenanzaMain extends React.Component<any, {state: number, id: any}> {
   constructor(props) {
     super(props);
-    this.state = {state: stateEnum.WAITING_FOR_NAME};
+    this.state = {state: stateEnum.WAITING_FOR_NAME, id: null};
   }
 
-  stateToggle() {
-    this.setState({state: stateEnum.CONNECTING})
+  submitName(name) {
+    this.setState({id: name, state: stateEnum.CONNECTING})
   }
-
+  
   render() {
     if (this.state.state == stateEnum.WAITING_FOR_NAME )
-      return <UserEntryForm stateChange = {() => this.stateToggle()}/>
-    else
-      return null
+      return <UserEntryForm stateChange = {(name) => this.submitName(name)}/>
+    else if (this.state.state == stateEnum.CONNECTING )
+      return <Lobby id = {this.state.id}/>
   }
 }
 

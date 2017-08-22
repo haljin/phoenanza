@@ -1,12 +1,12 @@
 import * as React from "react"
 
-export interface UserEntryFormProps {stateChange(): void}
-type UserData = {value: string, submitted: boolean}
+export interface UserEntryFormProps {stateChange(string): void}
+type UserData = {value: string}
 
 export default class UserEntryForm extends React.Component<UserEntryFormProps, UserData> {
   constructor(props) {
     super(props);
-    this.state = {value: '', submitted: false};
+    this.state = {value: ''};
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -16,7 +16,6 @@ export default class UserEntryForm extends React.Component<UserEntryFormProps, U
     if (this.state.value != "") {
       this.sendPostRequest();
       event.preventDefault()
-      this.setState({submitted: true})
     }
   }
 
@@ -32,16 +31,16 @@ export default class UserEntryForm extends React.Component<UserEntryFormProps, U
     xhr.onreadystatechange = () => { 
       if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 201) {
         console.log(xhr.responseText);
-        this.submitDone()
+        this.submitDone(JSON.parse(xhr.response).data.id)
       }
       else if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 422) 
-        alert("User name already taken!")
+        this.submitDone(JSON.parse(xhr.response).data.id)
     }
     xhr.send(JSON.stringify({user: {name: this.state.value}}))
   }
 
-  submitDone() {
-    this.props.stateChange()
+  submitDone(name) {
+    this.props.stateChange(name)
   }
 
   render() {

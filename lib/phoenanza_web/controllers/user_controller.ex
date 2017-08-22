@@ -1,5 +1,6 @@
 defmodule PhoenanzaWeb.UserController do
   use PhoenanzaWeb, :controller
+  require Logger
 
   alias Phoenanza.Players
   alias Phoenanza.Players.User
@@ -12,11 +13,12 @@ defmodule PhoenanzaWeb.UserController do
   end
 
   def create(conn, %{"user" => user_params}) do
+    Logger.debug("USER CONTROLLER #{inspect user_params}")
     with {:ok, %User{} = user} <- Players.create_user(user_params) do
       conn
       |> put_status(:created)
       |> put_resp_header("location", user_path(conn, :show, user))
-      |> render("show.json", user: user)
+      |> render("show.json", user: user)    
     end
   end
 
