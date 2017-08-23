@@ -12,15 +12,15 @@ export default class UserEntryForm extends React.Component<UserEntryFormProps, U
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleSubmit(event) {
+  handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     if (this.state.value != "") {
       this.sendPostRequest();
       event.preventDefault()
     }
   }
 
-  handleChange(event) {
-    this.setState({value: event.target.value});
+  handleChange(event: React.FormEvent<HTMLInputElement>) {
+    this.setState({value: event.currentTarget.value});
   }
 
   sendPostRequest() {
@@ -45,10 +45,10 @@ export default class UserEntryForm extends React.Component<UserEntryFormProps, U
 
   render() {
     return (
-    <form onSubmit={this.handleSubmit}>
+    <form onSubmit={e => this.handleSubmit(e)}>
       <label>
         Name: 
-        <input type="text" value={this.state.value} onChange={this.handleChange} />
+        <input type="text" value={this.state.value} onChange={e => this.handleChange(e)} />
       </label>
       <input type="submit" value="Submit" />
     </form>)

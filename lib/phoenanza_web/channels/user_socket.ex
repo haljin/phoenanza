@@ -2,6 +2,8 @@ defmodule PhoenanzaWeb.UserSocket do
   use Phoenix.Socket
   require Logger
 
+  alias Phoenanza.Players
+
   ## Channels
   channel "room:*", PhoenanzaWeb.LobbyChannel
 
@@ -21,8 +23,9 @@ defmodule PhoenanzaWeb.UserSocket do
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
   def connect(params, socket) do
-    Logger.info("SOCKET: #{inspect params}")
-    {:ok, socket}
+    userInfo = Players.get_user!(params["token"])
+    Logger.debug("SOCKET started for : #{inspect userInfo}")
+    {:ok, assign(socket, :user, userInfo)}
   end
 
   # Socket id's are topics that allow you to identify all sockets for a given user:

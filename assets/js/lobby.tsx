@@ -1,7 +1,8 @@
 import * as React from "react"
-import {Socket} from "phoenix"
+import {Socket, Channel} from "phoenix"
+import {userid} from "./phoenanza-main"
 
-export default class Lobby extends React.Component<{id: any}, any> {
+export default class Lobby extends React.Component<{id: userid}, {socket: Socket, channel: Channel, messages: string[]}> {
   constructor(props) {
     super(props)
     console.log("In Lobby constructor")
@@ -12,11 +13,75 @@ export default class Lobby extends React.Component<{id: any}, any> {
     let channel = socket.channel("room:lobby", {})
     channel.join()
       .receive("ok", resp => { console.log("Joined successfully", resp) })
-      .receive("error", resp => { console.log("Unable to join", resp) })      
+      .receive("error", resp => { console.log("Unable to join", resp) })   
+
+    channel.on("new_msg", payload => this.receiveMessage(payload.body))
+
+    this.state = {socket: socket, channel: channel, messages: []}
+  }
+
+  sendMessage(msg: string) {
+    this.state.channel.push("new_msg", {id: this.props.id, body: msg})    
+  }
+
+  receiveMessage(msg: string) {
+    const messages = this.state.messages;
+    messages.push(msg)
+    this.setState({messages: messages})
   }
 
   render() {
-    return <h1>"This is the lobby!"</h1>
+    return (
+    <div id="lobby">
+      <h1>"This is the lobby!"</h1>
+      <LobbyChatBox messages={this.state.messages}/>
+      <LobbyInput sendMessage={s => this.sendMessage(s)}/>
+    </div>)
+  }
+}
+
+class LobbyInput extends React.Component<{sendMessage: (string) => void}, {text: string}> {
+  constructor(props) {
+    super(props)
+    this.state = {text: ""}
+  }
+
+  onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    this.props.sendMessage(this.state.text)
+    this.setState({text: ""})
+  }
+
+  onChange(event: React.FormEvent<HTMLInputElement>) {
+    this.setState({text: event.currentTarget.value})
+  }
+
+  render() {
+    return (
+    <div id="lobby-input">
+      <form onSubmit={e => this.onSubmit(e)}>
+        <input type="text" value={this.state.text} onChange={e => this.onChange(e)}/>
+      </form>
+    </div>)
+  }
+}
+
+class LobbyChatBox extends React.Component<{messages: string[]}, any> {
+  constructor(props) {
+    super(props)
+  }
+
+  render() {    
+    let messages = this.props.messages.map((message, i) => { return <LobbyMsg key={i} msg={message}/> }) 
+
+    return <div id="chat-box"> {messages} </div>
+  }
+
+}
+
+class LobbyMsg extends React.Component<{msg: string}, any> {
+  render() {
+    return <li>{this.props.msg}</li>
   }
 }
 
