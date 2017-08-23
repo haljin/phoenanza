@@ -18,7 +18,6 @@ function render(node) {
          </div>),
         node
     )
-
 }
 
 

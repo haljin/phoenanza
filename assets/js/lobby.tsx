@@ -31,6 +31,7 @@ export default class Lobby extends React.Component<{id: userid}, {socket: Socket
   }
 
   render() {
+    console.log("Render of Lobby")
     return (
     <div id="lobby">
       <h1>"This is the lobby!"</h1>
@@ -67,20 +68,22 @@ class LobbyInput extends React.Component<{sendMessage: (string) => void}, {text:
 }
 
 class LobbyChatBox extends React.Component<{messages: string[]}, any> {
-  constructor(props) {
-    super(props)
-  }
-
   render() {    
-    let messages = this.props.messages.map((message, i) => { return <LobbyMsg key={i} msg={message}/> }) 
+    console.log("Render of LobbyChatBox")
+    const messages = this.props.messages.map((message, i) => { return <LobbyMsg key={i} msg={message}/> }) 
 
     return <div id="chat-box"> {messages} </div>
   }
-
 }
 
 class LobbyMsg extends React.Component<{msg: string}, any> {
+
+  shouldComponentUpdate() {
+    return false;
+  }
+
   render() {
+    console.log("Render of LobbyMsg")
     return <li>{this.props.msg}</li>
   }
 }
