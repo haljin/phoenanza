@@ -1,4 +1,5 @@
 # Phoenanza
+[![Build Status](https://travis-ci.org/haljin/phoenanza.svg?branch=master)](https://travis-ci.org/haljin/phoenanza)
 
 To start your Phoenix server:
 
