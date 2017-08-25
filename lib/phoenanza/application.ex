@@ -14,6 +14,7 @@ defmodule Phoenanza.Application do
       supervisor(PhoenanzaWeb.Endpoint, []),
       # Start your own worker by calling: Phoenanza.Worker.start_link(arg1, arg2, arg3)
       # worker(Phoenanza.Worker, [arg1, arg2, arg3]),
+      worker(Phoenanza.Repo.ETSCache, []),
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

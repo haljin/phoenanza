@@ -23,6 +23,7 @@ defmodule PhoenanzaWeb.Router do
   scope "/api/v1", PhoenanzaWeb do
     pipe_through :api
 
-    resources "/users", UserController, except: [:new, :edit]
+    get "/users/:name", UserController, :show
+    resources "/users", UserController, except: [:new, :edit, :show]
   end
 end

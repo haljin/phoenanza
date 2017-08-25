@@ -14,7 +14,7 @@ export default class UserEntryForm extends React.Component<UserEntryFormProps, U
 
   handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     if (this.state.value != "") {
-      this.sendPostRequest();
+      this.sendGetRequest();
       event.preventDefault()
     }
   }
@@ -23,20 +23,34 @@ export default class UserEntryForm extends React.Component<UserEntryFormProps, U
     this.setState({value: event.currentTarget.value});
   }
 
-  sendPostRequest() {
+  sendGetRequest() {
     let xhr = new XMLHttpRequest();
-    xhr.open('POST', './api/v1/users', true);
+    xhr.open('GET', './api/v1/users/' + this.state.value, true);
     xhr.setRequestHeader('Content-type', 'application/json');
     
     xhr.onreadystatechange = () => { 
-      if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 201) {
+      if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200)  {
         console.log(xhr.responseText);
         this.submitDone(JSON.parse(xhr.response).data.id)
       }
-      else if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 422) 
-        console.log("User already exists :(")
+      else if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 404) {
+        let xhrPost = new XMLHttpRequest();
+        xhrPost.open('POST', './api/v1/users/', true);
+        xhrPost.setRequestHeader('Content-type', 'application/json');
+        
+        xhrPost.onreadystatechange = () => { 
+          if(xhrPost.readyState === XMLHttpRequest.DONE && xhrPost.status === 201)  {
+            console.log(xhrPost.responseText);
+            this.submitDone(JSON.parse(xhrPost.response).data.id)
+          }
+          else if(xhrPost.readyState === XMLHttpRequest.DONE && xhrPost.status === 422) {
+            alert("Bad user name")            
+          }
+        }
+        xhrPost.send(JSON.stringify({user: {name: this.state.value}}))
+      }
     }
-    xhr.send(JSON.stringify({user: {name: this.state.value}}))
+    xhr.send()
   }
 
   submitDone(name) {

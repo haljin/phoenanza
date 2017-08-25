@@ -3,6 +3,7 @@ defmodule PhoenanzaWeb.UserSocket do
   require Logger
 
   alias Phoenanza.Players
+  alias Phoenanza.Repo.ETSCache
 
   ## Channels
   channel "room:*", PhoenanzaWeb.LobbyChannel
@@ -25,6 +26,7 @@ defmodule PhoenanzaWeb.UserSocket do
   def connect(params, socket) do
     userInfo = Players.get_user!(params["token"])
     Logger.debug("SOCKET started for : #{inspect userInfo}")
+    ETSCache.insert(userInfo)
     {:ok, assign(socket, :user, userInfo)}
   end
 
@@ -39,4 +41,6 @@ defmodule PhoenanzaWeb.UserSocket do
   #
   # Returning `nil` makes this socket anonymous.
   def id(_socket), do: nil
+
+  
 end

@@ -31,8 +31,8 @@ defmodule Phoenanza.PlayersTest do
     end
 
     test "get_user_by_name/1 returns the user by given name" do
-      _user = user_fixture()
-      assert Players.get_user_by_name("some name")
+      user = user_fixture()
+      assert Players.get_user_by_name("some name") == user
     end
 
     test "create_user/1 with valid data creates a user" do
