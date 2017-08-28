@@ -22,16 +22,18 @@ defmodule PhoenanzaWeb.UserController do
     end
   end
 
-  def show(conn, %{"name" => name} = data) do
-    Logger.debug("Getting the user by name")
-    case Players.get_user_by_name(name) do
-      nil -> {:error, :not_found}
-      existingUser -> render(conn, "show.json", user: existingUser)
-    end    
-  end
+
   def show(conn, %{"id" => id}) do
     user = Players.get_user!(id)
     render(conn, "show.json", user: user)
+  end
+
+  def new(conn, %{"name" => name} = user_params) do
+    Logger.debug("Getting the user by name")
+    case Players.get_user_by_name(name) do
+      nil -> create(conn, %{"user" => user_params})
+      existingUser -> render(conn, "show.json", user: existingUser)
+    end    
   end
 
   def update(conn, %{"id" => id, "user" => user_params}) do

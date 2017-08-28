@@ -25,7 +25,7 @@ export default class UserEntryForm extends React.Component<UserEntryFormProps, U
 
   sendGetRequest() {
     let xhr = new XMLHttpRequest();
-    xhr.open('GET', './api/v1/users/' + this.state.value, true);
+    xhr.open('GET', './api/v1/users/new?name=' + encodeURIComponent(this.state.value), true);
     xhr.setRequestHeader('Content-type', 'application/json');
     
     xhr.onreadystatechange = () => { 
@@ -33,25 +33,17 @@ export default class UserEntryForm extends React.Component<UserEntryFormProps, U
         console.log(xhr.responseText);
         this.submitDone(JSON.parse(xhr.response).data.id)
       }
-      else if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 404) {
-        let xhrPost = new XMLHttpRequest();
-        xhrPost.open('POST', './api/v1/users/', true);
-        xhrPost.setRequestHeader('Content-type', 'application/json');
-        
-        xhrPost.onreadystatechange = () => { 
-          if(xhrPost.readyState === XMLHttpRequest.DONE && xhrPost.status === 201)  {
-            console.log(xhrPost.responseText);
-            this.submitDone(JSON.parse(xhrPost.response).data.id)
-          }
-          else if(xhrPost.readyState === XMLHttpRequest.DONE && xhrPost.status === 422) {
-            alert("Bad user name")            
-          }
-        }
-        xhrPost.send(JSON.stringify({user: {name: this.state.value}}))
+      else if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 201)  {
+        console.log(xhr.responseText);
+        this.submitDone(JSON.parse(xhr.response).data.id)
+      }
+      else if(xhr.readyState === XMLHttpRequest.DONE) {
+        alert("Bad user name")            
       }
     }
     xhr.send()
   }
+
 
   submitDone(name) {
     this.props.stateChange(name)
