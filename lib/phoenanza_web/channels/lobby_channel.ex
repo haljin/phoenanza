@@ -2,7 +2,7 @@ defmodule PhoenanzaWeb.LobbyChannel do
     use Phoenix.Channel
     require Logger
 
-    alias Phoenanza.Repo.ETSCache
+    alias Phoenanza.Players
     alias Phoenanza.Players.User
 
     def join("room:lobby", _message, socket) do
@@ -14,7 +14,7 @@ defmodule PhoenanzaWeb.LobbyChannel do
     end
 
     def handle_info(:after_join, socket) do
-      allInChat = for %User{name: name} <- ETSCache.list_users() do name end 
+      allInChat = for %User{name: name} <- Players.list_users_in_cache() do name end 
       broadcast! socket, "chat_list", %{users: allInChat}  
       {:noreply, socket}   
     end
@@ -24,12 +24,18 @@ defmodule PhoenanzaWeb.LobbyChannel do
       user = socket.assigns.user
       broadcast! socket, "new_msg", %{body: user.name <> ": " <> body}
       {:noreply, socket}
-    end   
+    end    
+    def handle_in("new_game", %{"id" => playerId, "gameName" => game}, socket) do
+
+
+      {:noreply, socket}
+    end  
     
     def terminate(_msg, socket) do
-      user = socket.assigns.user
-      ETSCache.delete_user(user)     
-      allInChat = for %User{name: name} <- ETSCache.list_users() do name end 
+      Logger.debug("Socket closed for #{inspect socket.assigns.user}")
+      user = socket.assigns.user   
+      Players.decache_user(user) 
+      allInChat = for %User{name: name} <- Players.list_users_in_cache() do name end 
       broadcast! socket, "chat_list", %{users: allInChat}  
     end    
   end

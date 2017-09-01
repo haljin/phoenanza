@@ -3,10 +3,10 @@ defmodule PhoenanzaWeb.UserSocket do
   require Logger
 
   alias Phoenanza.Players
-  alias Phoenanza.Repo.ETSCache
 
   ## Channels
   channel "room:*", PhoenanzaWeb.LobbyChannel
+  channel "game:*", PhoenanzaWeb.GameChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket
@@ -24,9 +24,8 @@ defmodule PhoenanzaWeb.UserSocket do
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
   def connect(params, socket) do
-    userInfo = Players.get_user!(params["token"])
+    {:ok, userInfo} = Players.cache_user(params["token"])
     Logger.debug("SOCKET started for : #{inspect userInfo}")
-    ETSCache.insert(userInfo)
     {:ok, assign(socket, :user, userInfo)}
   end
 

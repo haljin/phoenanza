@@ -2,15 +2,15 @@ import * as React from "react"
 import {Socket, Channel} from "phoenix"
 import {userid} from "./phoenanza-main"
 
-export default class Lobby extends React.Component<{id: userid}, {socket: Socket, channel: Channel, messages: string[], names: string[]}> {
+type LobbyProps = {socket: Socket, id: userid, stateChange(any) : void}
+type LobbyState = {channel: Channel, messages: string[], names: string[]}
+
+export default class Lobby extends React.Component<LobbyProps, LobbyState> {
   constructor(props) {
     super(props)
-    console.log("In Lobby constructor")
-    let socket = new Socket("/socket", {params: {token: this.props.id}})
-
-    socket.connect()
+    console.log("In Lobby constructor")  
     
-    let channel = socket.channel("room:lobby", {})
+    let channel = this.props.socket.channel("room:lobby", {})
     channel.join()
       .receive("ok", resp => { console.log("Joined successfully", resp) })
       .receive("error", resp => { console.log("Unable to join", resp) })   
@@ -18,10 +18,10 @@ export default class Lobby extends React.Component<{id: userid}, {socket: Socket
     channel.on("new_msg", payload => this.receiveMessage(payload.body))
     channel.on("chat_list", payload => this.receivePlayerList(payload.users))
 
-    this.state = {socket: socket, channel: channel, messages: [], names:[]}
+    this.state = {channel: channel, messages: [], names:[]}
   }
 
-  sendMessage(msg: string) {
+  sendChatMessage(msg: string) {
     this.state.channel.push("new_msg", {id: this.props.id, body: msg})    
   }
 
@@ -35,13 +35,19 @@ export default class Lobby extends React.Component<{id: userid}, {socket: Socket
     this.setState({messages: messages})
   }
 
+  createGame(gameName: string) {
+    this.state.channel.leave()
+    this.props.stateChange(gameName)
+  }
+
   render() {
     console.log("Render of Lobby")
     return (
     <div id="lobby">
       <LobbyPlayerList names={this.state.names}/>
       <LobbyChatBox messages={this.state.messages}/>
-      <LobbyInput sendMessage={s => this.sendMessage(s)}/>
+      <LobbyInput sendMessage={s => this.sendChatMessage(s)}/>
+      <GamePanel createGame={s => this.createGame(s)}/>
     </div>)
   }
 }
@@ -110,8 +116,33 @@ class LobbyPlayer extends React.Component<{playerName: string}, any> {
   render() {
     return <li>{this.props.playerName}</li>
   }
+}
 
+class GamePanel extends React.Component<{createGame: (string) => void}, {text: string}> {
+  constructor(props) {
+    super(props)
+    this.state = {text: ""}
+  }
 
+  onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    this.props.createGame(this.state.text)
+    this.setState({text: ""})
+  }
+
+  onChange(event: React.FormEvent<HTMLInputElement>) {
+    this.setState({text: event.currentTarget.value})
+  }
+
+  render() {
+    return (
+    <div id="game-panel">
+      <h2>Join Game: </h2>
+      <form onSubmit={e => this.onSubmit(e)}>
+        <input type="text" value={this.state.text} onChange={e => this.onChange(e)}/>
+      </form>
+    </div>)
+  }
 }
 
 

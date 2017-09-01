@@ -3,6 +3,7 @@ defmodule Phoenanza.Repo.ETSCache do
   require Logger
 
   alias Phoenanza.Players.User
+  alias Phoenanza.Games.Game
 
 #  ---------------------------- API ----------------------------
   def start_link(opts \\ []) do
@@ -10,10 +11,14 @@ defmodule Phoenanza.Repo.ETSCache do
   end 
 
   # @doc "Insert a data structure into the ETS cache"
-  @spec insert(%User{}) :: {:ok, %User{}}
+  @spec insert(%User{} | %Game{}) :: {:ok, %User{}} | {:ok, %Game{}}
   def insert(%User{} = newUser) do
     :ets.insert(User, {newUser.id, newUser})
     {:ok, newUser}
+  end  
+  def insert(%Game{} = newGame) do
+    :ets.insert(Game, {newGame.id, newGame})
+    {:ok, newGame}
   end
 #  -------------------------- User Cache ------------------------
   # @doc "List all users in the cache"
@@ -22,7 +27,7 @@ defmodule Phoenanza.Repo.ETSCache do
     all(User)
   end
 
-  # @doc "Retrieves user by id from the cache"
+  # @doc "Retrieves a user by id from the cache"
   @spec get_user!(integer) :: %User{}
   def get_user!(id) do
     get!(User, id)
@@ -40,21 +45,53 @@ defmodule Phoenanza.Repo.ETSCache do
     delete(user)
   end
 
+#  -------------------------- Game Cache ------------------------
+  # @doc "List all games in the cache"
+  @spec list_games() :: [%Game{}]
+  def list_games() do
+    all(Game)
+  end
+
+  # @doc "Retrieves a game by id from the cache"
+  @spec get_game(integer) :: %Game{}
+  def get_game(id) do
+    get(Game, id)
+  end
+  
+  # @doc "Update the game in the cache"
+  @spec update_game(%Game{}) :: {:ok, %Game{}}
+  def update_game(game) do
+    update(game)
+  end
+
+  # @doc "Deletes the specified game"
+  @spec delete_game(%Game{}) :: {:ok, %Game{}}
+  def delete_game(game) do
+    delete(game)
+  end
 
 #  ---------------------- GenServer Callbacks -------------------
   def init(opts) do
     Logger.info("Starting Phoenanza.Repo")
     :ets.new(User, [:set, :public, :named_table, read_concurrency: true])
+    :ets.new(Game, [:set, :public, :named_table, read_concurrency: true])
     {:ok, opts}
   end
 #  ----------------- Generic internal functions -----------------
 
-  defp all(User) do
-    for {_, user} <- :ets.tab2list(User) do user end
+  defp all(tab) do
+    for {_, entry} <- :ets.tab2list(tab) do entry end
+  end
+  
+  defp get(tab, id) do
+    case :ets.lookup(tab, id) do
+      [{^id, one}] -> one
+      [] -> {:error, :not_found}
+    end
   end
 
-  defp get!(User, id) do
-    case :ets.lookup(User, id) do
+  defp get!(tab, id) do
+    case :ets.lookup(tab, id) do
       [{^id, one}] -> one
     end
   end
@@ -63,9 +100,17 @@ defmodule Phoenanza.Repo.ETSCache do
     :ets.update_element(User, newUser.id, {2, newUser})
     {:ok, newUser}    
   end
+  defp update(%Game{} = newGame) do
+    :ets.update_element(Game, newGame.id, {2, newGame})
+    {:ok, newGame}    
+  end
 
   defp delete(%User{id: id} = user) do
     :ets.delete(User, id)
     {:ok, user}
+  end
+  defp delete(%Game{id: id} = game) do
+    :ets.delete(Game, id)
+    {:ok, game}
   end
 end

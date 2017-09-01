@@ -105,4 +105,23 @@ defmodule Phoenanza.Players do
   def change_user(%User{} = user) do
     User.changeset(user, %{})
   end
+
+  def cache_user(%User{} = user) do
+    Repo.ETSCache.insert(user)
+  end
+  def cache_user(userId) do
+    user = get_user!(userId)
+    Repo.ETSCache.insert(user)
+  end
+
+  def decache_user(%User{} = user) do    
+    Repo.ETSCache.delete_user(user)     
+  end
+
+  def list_users_in_cache() do
+    Repo.ETSCache.list_users()
+  end
+
+
+
 end
