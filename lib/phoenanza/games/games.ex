@@ -7,12 +7,15 @@ defmodule Phoenanza.Games do
   def join_game(gameId, playerId, callback) do
     %Game{sup_pid: pid, game_pid: gamePid, players: players} = game = ETSCache.get_game(gameId)
     player = Players.get_user!(playerId)
-    {:ok, playerPid} = ExBeans.Game.Supervisor.new_player(pid, player.name)
-    :ok = ExBeans.Player.join_game(playerPid, gamePid, callback)
-    ETSCache.update_game(%Game{game | players: [{playerId, player, playerPid} | players]})
-
-    {:ok, playerPid}
-   
+    
+    case ExBeans.Game.Supervisor.new_player(pid, player.name) do
+      {:ok, playerPid} ->
+        :ok = ExBeans.Player.join_game(playerPid, gamePid, callback)
+        ETSCache.update_game(%Game{game | players: [{playerId, player, playerPid} | players]})
+        {:ok, playerPid}
+      _ ->
+        {:error, :game_full}
+    end
   end
 
   def new_game(gameId) do
@@ -23,6 +26,17 @@ defmodule Phoenanza.Games do
         ETSCache.insert(newGame)
       game ->
         {:ok, game}
+    end
+  end
+
+  def stop_game(gameId) do
+    case ETSCache.get_game(gameId) do
+      {:error, :not_found} -> 
+        :ok
+      %Game{sup_pid: pid} = game ->
+        ETSCache.delete_game(game)
+        ExBeans.Games.Supervisor.stop_game(pid)
+        :ok
     end
   end
 

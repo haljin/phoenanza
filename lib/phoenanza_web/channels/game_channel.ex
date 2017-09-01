@@ -7,6 +7,7 @@ defmodule PhoenanzaWeb.GameChannel do
     alias Phoenanza.Games
 
     def join("game:" <> _gameName, _message, socket) do
+      # TODO: Deny connection if the game was not created yet
       {:ok, socket}
     end
    
@@ -14,8 +15,8 @@ defmodule PhoenanzaWeb.GameChannel do
       user = socket.assigns.user
       Logger.debug("User #{inspect user.name} is starting a game")
       {:ok, _game} = Games.new_game(gameName)
-      {:ok, playerPid} = Games.join_game(gameName, playerId, &PhoenanzaWeb.GameChannel.player_callback/3)
-
+      # TODO: Send a fail response if joining fails, move the game creation to lobby channel
+      {:ok, playerPid} = Games.join_game(gameName, playerId, &PhoenanzaWeb.GameChannel.player_callback/3)      
 
       {:noreply, Phoenix.Socket.assign(Phoenix.Socket.assign(socket, :game, gameName), :player,  playerPid)}
     end  
@@ -24,6 +25,13 @@ defmodule PhoenanzaWeb.GameChannel do
       Logger.debug("Msg from game now in state #{inspect state} hand #{inspect hand} field #{inspect field}")
       :ok
     end
+    
+    def terminate(msg, socket) do
+      # TODO: Consider not stopping when the player quits and allow resuming of games
+      Logger.debug("GameChannel.terminate with #{inspect msg}")
+      Games.stop_game(socket.assigns.game)
+      broadcast! socket, "game_ended", %{}
+    end  
 
     
   end

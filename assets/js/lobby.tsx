@@ -36,6 +36,7 @@ export default class Lobby extends React.Component<LobbyProps, LobbyState> {
   }
 
   createGame(gameName: string) {
+    // TODO: Create the game already here, so in case of failure you do not leave the lobby
     this.state.channel.leave()
     this.props.stateChange(gameName)
   }
