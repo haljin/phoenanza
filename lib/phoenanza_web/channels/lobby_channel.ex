@@ -4,8 +4,10 @@ defmodule PhoenanzaWeb.LobbyChannel do
 
     alias Phoenanza.Players
     alias Phoenanza.Players.User
+    alias Phoenanza.Games
 
     def join("room:lobby", _message, socket) do
+      {:ok, _userInfo} = Players.cache_user(socket.assigns.user)
       send(self(), :after_join)
       {:ok, socket}
     end
@@ -16,19 +18,28 @@ defmodule PhoenanzaWeb.LobbyChannel do
     def handle_info(:after_join, socket) do
       allInChat = for %User{name: name} <- Players.list_users_in_cache() do name end 
       broadcast! socket, "chat_list", %{users: allInChat}  
+      broadcast! socket, "game_list", %{games: Games.list_games()}  
       {:noreply, socket}   
     end
 
     def handle_in("new_msg", %{"body" => body}, socket) do
-      Logger.debug("IN #{inspect socket}")
       user = socket.assigns.user
       broadcast! socket, "new_msg", %{body: user.name <> ": " <> body}
       {:noreply, socket}
     end    
-    def handle_in("new_game", %{"id" => playerId, "gameName" => game}, socket) do
-
-
-      {:noreply, socket}
+    def handle_in("join_game", %{"id" => playerId, "gameName" => gameName}, socket) do
+      user = socket.assigns.user
+      Logger.debug("User #{inspect user.name} is starting a game")
+      {:ok, _game} = Games.new_game(gameName)      
+      broadcast! socket, "game_list", %{games: Games.list_games()}  
+      case Games.join_game(gameName, playerId, &PhoenanzaWeb.GameChannel.player_callback/3) do
+        {:ok, _playerPid} ->  
+          push socket, "game_joined", %{"gameName" => gameName}
+          {:noreply, socket}
+        {:error, :game_full} ->
+          push socket, "error", %{"message" => "Game is full!"}
+          {:noreply, socket}
+      end     
     end  
     
     def terminate(_msg, socket) do

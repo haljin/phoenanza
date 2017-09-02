@@ -29,16 +29,18 @@ defmodule Phoenanza.Games do
     end
   end
 
-  def stop_game(gameId) do
-    case ETSCache.get_game(gameId) do
-      {:error, :not_found} -> 
-        :ok
-      %Game{sup_pid: pid} = game ->
-        ETSCache.delete_game(game)
-        ExBeans.Games.Supervisor.stop_game(pid)
-        :ok
-    end
+  def find_game(gameId) do
+    ETSCache.get_game(gameId)
   end
 
+  def list_games() do
+    for %Game{id: name} <- ETSCache.list_games() do name end     
+  end
 
+  def stop_game(gameId) do
+    with %Game{sup_pid: pid} = game <- ETSCache.get_game(gameId) do
+      ETSCache.delete_game(game)
+      ExBeans.Games.Supervisor.stop_game(pid)      
+    end
+  end
 end

@@ -6,19 +6,19 @@ defmodule PhoenanzaWeb.GameChannel do
     alias Phoenanza.Players.User
     alias Phoenanza.Games
 
-    def join("game:" <> _gameName, _message, socket) do
-      # TODO: Deny connection if the game was not created yet
-      {:ok, socket}
+    def join("game:" <> gameName, _message, socket) do
+      case Games.find_game(gameName) do
+        {:error, _} -> 
+          {:error, %{reason: "wrong game name"}}
+        game ->           
+          user = socket.assigns.user
+          {_, _, playerPid}  = List.keyfind(game.players, user.id, 0)
+          {:ok, Phoenix.Socket.assign(Phoenix.Socket.assign(socket, :game, gameName), :player,  playerPid)}
+      end
     end
    
     def handle_in("new_game", %{"id" => playerId, "gameName" => gameName}, socket) do
-      user = socket.assigns.user
-      Logger.debug("User #{inspect user.name} is starting a game")
-      {:ok, _game} = Games.new_game(gameName)
-      # TODO: Send a fail response if joining fails, move the game creation to lobby channel
-      {:ok, playerPid} = Games.join_game(gameName, playerId, &PhoenanzaWeb.GameChannel.player_callback/3)      
-
-      {:noreply, Phoenix.Socket.assign(Phoenix.Socket.assign(socket, :game, gameName), :player,  playerPid)}
+      {:noreply, socket}
     end  
 
     def player_callback(state, hand, field) do

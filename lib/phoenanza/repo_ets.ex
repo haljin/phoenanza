@@ -1,4 +1,8 @@
 defmodule Phoenanza.Repo.ETSCache do
+  @moduledoc """
+  ETS cache for storing temporary information and fast access. The cache stores information on currently active users and 
+  currently played games.
+  """
   use GenServer
   require Logger
 
@@ -10,7 +14,7 @@ defmodule Phoenanza.Repo.ETSCache do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end 
 
-  # @doc "Insert a data structure into the ETS cache"
+  @doc "Insert a data structure into the ETS cache"
   @spec insert(%User{} | %Game{}) :: {:ok, %User{}} | {:ok, %Game{}}
   def insert(%User{} = newUser) do
     :ets.insert(User, {newUser.id, newUser})
@@ -21,50 +25,56 @@ defmodule Phoenanza.Repo.ETSCache do
     {:ok, newGame}
   end
 #  -------------------------- User Cache ------------------------
-  # @doc "List all users in the cache"
+  @doc "List all users in the cache"
   @spec list_users() :: [%User{}]
   def list_users() do
     all(User)
   end
 
-  # @doc "Retrieves a user by id from the cache"
+  @doc "Retrieves a user by id from the cache"
   @spec get_user!(integer) :: %User{}
   def get_user!(id) do
     get!(User, id)
   end
 
-  # @doc "Update the user in the cache"
+  @doc "Update the user in the cache"
   @spec update_user(%User{}) :: {:ok, %User{}}
   def update_user(user) do
     update(user)
   end
 
-  # @doc "Deletes the specified user"
+  @doc "Deletes the specified user"
   @spec delete_user(%User{}) :: {:ok, %User{}}
   def delete_user(user) do
     delete(user)
   end
 
+  @doc "Deletes all users in the cache"
+  @spec delete_all_users() :: true
+  def delete_all_users() do
+    delete_all(User)
+  end
+
 #  -------------------------- Game Cache ------------------------
-  # @doc "List all games in the cache"
+  @doc "List all games in the cache"
   @spec list_games() :: [%Game{}]
   def list_games() do
     all(Game)
   end
 
-  # @doc "Retrieves a game by id from the cache"
+  @doc "Retrieves a game by id from the cache"
   @spec get_game(integer) :: %Game{}
   def get_game(id) do
     get(Game, id)
   end
   
-  # @doc "Update the game in the cache"
+  @doc "Update the game in the cache"
   @spec update_game(%Game{}) :: {:ok, %Game{}}
   def update_game(game) do
     update(game)
   end
 
-  # @doc "Deletes the specified game"
+  @doc "Deletes the specified game"
   @spec delete_game(%Game{}) :: {:ok, %Game{}}
   def delete_game(game) do
     delete(game)
@@ -112,5 +122,9 @@ defmodule Phoenanza.Repo.ETSCache do
   defp delete(%Game{id: id} = game) do
     :ets.delete(Game, id)
     {:ok, game}
+  end
+
+  defp delete_all(tab) do
+    :ets.delete_all_objects(tab)
   end
 end

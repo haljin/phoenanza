@@ -3,22 +3,15 @@ defmodule Phoenanza.PlayersTest do
   require Logger
 
   alias Phoenanza.Players
+  alias Phoenanza.Players.User
   
   describe "users" do
-    alias Phoenanza.Players.User
 
     @valid_attrs %{name: "some name"}
     @update_attrs %{name: "some updated name"}
     @invalid_attrs %{name: nil}
 
-    def user_fixture(attrs \\ %{}) do
-      {:ok, user} =
-        attrs 
-        |> Enum.into(@valid_attrs)
-        |> Players.create_user()
-
-      user
-    end
+ 
 
     test "list_users/0 returns all users" do
       user = user_fixture()
@@ -76,4 +69,44 @@ defmodule Phoenanza.PlayersTest do
       assert %Ecto.Changeset{} = Players.change_user(user)
     end
   end
+
+  describe "user cache" do
+
+    setup do
+      Players.clear_cache()
+      :ok
+    end
+
+    test "cache_user/1 adds a new user to cache" do
+      user = user_fixture()
+      Players.cache_user(user)
+      assert Players.list_users_in_cache() == [user]
+    end
+    
+    test "cache_user/1 adds a new user to cache by user name" do
+      user = user_fixture()
+      Players.cache_user(user.id)
+      assert Players.list_users_in_cache() == [user]
+    end
+    
+    test "decache_user/1 removes the user from cache" do
+      user = user_fixture()
+      Players.cache_user(user)
+      assert Players.list_users_in_cache() == [user]
+      Players.decache_user(user)
+      assert Players.list_users_in_cache() == []
+    end
+    
+  end
+  
+
+  def user_fixture(attrs \\ %{}) do
+    {:ok, user} =
+      attrs 
+      |> Enum.into(@valid_attrs)
+      |> Players.create_user()
+
+    user
+  end
+
 end

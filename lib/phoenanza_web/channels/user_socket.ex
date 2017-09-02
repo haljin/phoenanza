@@ -24,7 +24,7 @@ defmodule PhoenanzaWeb.UserSocket do
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
   def connect(params, socket) do
-    {:ok, userInfo} = Players.cache_user(params["token"])
+    userInfo = Players.get_user!(params["token"])
     Logger.debug("SOCKET started for : #{inspect userInfo}")
     {:ok, assign(socket, :user, userInfo)}
   end

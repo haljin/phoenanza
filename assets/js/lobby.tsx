@@ -3,7 +3,7 @@ import {Socket, Channel} from "phoenix"
 import {userid} from "./phoenanza-main"
 
 type LobbyProps = {socket: Socket, id: userid, stateChange(any) : void}
-type LobbyState = {channel: Channel, messages: string[], names: string[]}
+type LobbyState = {channel: Channel, messages: string[], names: string[], games: string[]}
 
 export default class Lobby extends React.Component<LobbyProps, LobbyState> {
   constructor(props) {
@@ -17,8 +17,11 @@ export default class Lobby extends React.Component<LobbyProps, LobbyState> {
 
     channel.on("new_msg", payload => this.receiveMessage(payload.body))
     channel.on("chat_list", payload => this.receivePlayerList(payload.users))
+    channel.on("game_list", payload => this.receiveGamesList(payload.games))
+    channel.on("game_joined", payload => this.gameJoined(payload.gameName))
+    channel.on("error", payload => alert(payload.message))
 
-    this.state = {channel: channel, messages: [], names:[]}
+    this.state = {channel: channel, messages: [], names: [], games: []}
   }
 
   sendChatMessage(msg: string) {
@@ -28,6 +31,10 @@ export default class Lobby extends React.Component<LobbyProps, LobbyState> {
   receivePlayerList(list: string[]) {
     this.setState({names: list})
   }
+  
+  receiveGamesList(list: string[]) {
+    this.setState({games: list})
+  }
 
   receiveMessage(msg: string) {
     const messages = this.state.messages;
@@ -36,9 +43,14 @@ export default class Lobby extends React.Component<LobbyProps, LobbyState> {
   }
 
   createGame(gameName: string) {
-    // TODO: Create the game already here, so in case of failure you do not leave the lobby
+    this.state.channel.push("join_game", {id: this.props.id, gameName: gameName}) 
+  }
+
+  gameJoined(gameName: string) {
+    console.log("leaving channel!")
     this.state.channel.leave()
-    this.props.stateChange(gameName)
+    this.setState({channel: null})
+    this.props.stateChange(gameName) 
   }
 
   render() {
@@ -48,6 +60,7 @@ export default class Lobby extends React.Component<LobbyProps, LobbyState> {
       <LobbyPlayerList names={this.state.names}/>
       <LobbyChatBox messages={this.state.messages}/>
       <LobbyInput sendMessage={s => this.sendChatMessage(s)}/>
+      <GameList games={this.state.games} joinGame={gameName => this.createGame(gameName)}/>
       <GamePanel createGame={s => this.createGame(s)}/>
     </div>)
   }
@@ -138,7 +151,7 @@ class GamePanel extends React.Component<{createGame: (string) => void}, {text: s
   render() {
     return (
     <div id="game-panel">
-      <h2>Join Game: </h2>
+      <h2>Create Game: </h2>
       <form onSubmit={e => this.onSubmit(e)}>
         <input type="text" value={this.state.text} onChange={e => this.onChange(e)}/>
       </form>
@@ -146,4 +159,25 @@ class GamePanel extends React.Component<{createGame: (string) => void}, {text: s
   }
 }
 
+class GameList extends React.Component<{games: string[], joinGame: (string) => void}, any> {
+  render() {    
+    const games = this.props.games.map((name) => { return <GameEntry key={name} name={name} joinGame={name => this.props.joinGame(name)}/> }) 
+    return <div id="game-list"> <h2>Games:</h2> {games} </div>
+  }
+}
+
+
+class GameEntry extends React.Component<{name: string, joinGame: (string) => void}, any> {  
+    shouldComponentUpdate() {
+      return false
+    }
+  
+    joinGame() {
+      this.props.joinGame(this.props.name)
+    }
+
+    render() {
+      return (<p className="game-entry" onDoubleClick={e => this.joinGame()}> {this.props.name} </p>)
+    }
+  }
 
