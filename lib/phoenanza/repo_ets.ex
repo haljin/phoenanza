@@ -79,6 +79,12 @@ defmodule Phoenanza.Repo.ETSCache do
   def delete_game(game) do
     delete(game)
   end
+  
+  @doc "Deletes all games in the cache"
+  @spec delete_all_games() :: true
+  def delete_all_games() do
+    delete_all(Game)
+  end
 
 #  ---------------------- GenServer Callbacks -------------------
   def init(opts) do
