@@ -27,23 +27,16 @@ defmodule PhoenanzaWeb.LobbyChannel do
       broadcast! socket, "new_msg", %{body: user.name <> ": " <> body}
       {:noreply, socket}
     end    
-    def handle_in("join_game", %{"id" => playerId, "gameName" => gameName}, socket) do
+    def handle_in("create_game", %{"gameName" => gameName}, socket) do
       user = socket.assigns.user
       Logger.debug("User #{inspect user.name} is starting a game")
       {:ok, _game} = Games.new_game(gameName)      
       broadcast! socket, "game_list", %{games: Games.list_games()}  
-      case Games.join_game(gameName, playerId, &PhoenanzaWeb.GameChannel.player_callback/3) do
-        {:ok, _playerPid} ->  
-          push socket, "game_joined", %{"gameName" => gameName}
-          {:noreply, socket}
-        {:error, :game_full} ->
-          push socket, "error", %{"message" => "Game is full!"}
-          {:noreply, socket}
-      end     
+      {:noreply, socket}
     end  
     
     def terminate(_msg, socket) do
-      Logger.debug("Socket closed for #{inspect socket.assigns.user}")
+      Logger.debug("LobbyChannel closed for #{inspect socket.assigns.user.name}")
       user = socket.assigns.user   
       Players.decache_user(user) 
       allInChat = for %User{name: name} <- Players.list_users_in_cache() do name end 

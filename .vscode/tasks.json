@@ -27,6 +27,12 @@
           "$mixTestFailure"
         ],
         "isTestCommand": true
+      },
+      {
+        "taskName": "server",
+        "args": [
+          "phx.server"
+        ]
       }
     ]
   }
