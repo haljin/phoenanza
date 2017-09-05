@@ -17,6 +17,8 @@ type gameState = {
   opponentName: string,
   opponentFields: fields}
 
+  // TODO: Add state name to state, propagate it down, differentiate display based on state
+
 export default class Game extends React.Component<gameProps, gameState> {
   constructor(props) {
     super(props)    
@@ -51,11 +53,17 @@ export default class Game extends React.Component<gameProps, gameState> {
   }
 
   plantBean(fieldIndex: number) {
+    // TODO: Work differently in mid card phase
     this.state.channel.push("plant_bean", {index: fieldIndex})
   }
 
   discardCard(cardIndex: number) {
     this.state.channel.push("discard_card", {index: cardIndex})
+  }
+
+  midClicked(midCardIndex: number) {
+    console.log("mid clicked " + midCardIndex)
+    // TODO: Set mid card as active, allow it to be planted
   }
 
   pass() {
@@ -72,7 +80,7 @@ export default class Game extends React.Component<gameProps, gameState> {
           </div>
           <div id="mid-field">
             <DiscardPile top={this.state.topDiscard}/>
-            <MidField cards={this.state.midCards}/>
+            <MidField cards={this.state.midCards} midClicked={(i) => this.midClicked(i)}/>
           </div>
           {/* <p onDoubleClick={() => this.props.backToLobby()}>try me</p> */}
           <div id="player-area">
@@ -141,9 +149,10 @@ class DiscardPile extends React.Component<{top: card}, {}> {
 }
 
 
-class MidField extends React.Component<{cards: card[]}, {}> {
+class MidField extends React.Component<{cards: card[], midClicked: (number) => void}, {}> {
+
   render() {    
-    const cards = this.props.cards.map((card, i) => { return <Card key={i + card.name} type={card.name}/> }) 
+    const cards = this.props.cards.map((card, i) => { return <Card onDoubleClick={() => this.props.midClicked(i)} key={i + card.name} type={card.name}/> }) 
     return <div id="mid-cards"> <h2>Mid cards:</h2> {cards} </div>
   }  
 }
