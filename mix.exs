@@ -41,7 +41,8 @@ defmodule Phoenanza.Mixfile do
       {:phoenix_live_reload, "~> 1.0", only: :dev},
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
-      {:exbeans, git: "https://github.com/haljin/exbeans"}
+      {:exbeans, git: "https://github.com/haljin/exbeans"},
+      {:cors_plug, "~> 1.2"}
     ]
   end
 

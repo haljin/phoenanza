@@ -10,6 +10,7 @@ defmodule PhoenanzaWeb.Router do
   end
 
   pipeline :api do
+    plug CORSPlug, [origin: "*"]
     plug :accepts, ["json"]
   end
 
@@ -24,5 +25,6 @@ defmodule PhoenanzaWeb.Router do
     pipe_through :api
 
     resources "/users", UserController, except: [:edit]
+    options "/users", UserController, :options
   end
 end

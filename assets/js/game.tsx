@@ -6,6 +6,7 @@ import {userid} from "./phoenanza-main"
 type card = {name: string}
 type beanfield = card[] | "not_available"
 type fields = {1: beanfield, 2: beanfield, 3: beanfield}
+type gameStateName = "no_turn" | "initial_cards" | "play_cards" | "discard" | "bonus_cards" | "end_turn"
 type gameProps = {gameName: string, id: userid, socket: Socket, backToLobby: () => void}
 type gameState = {
   channel: Channel, 
@@ -15,7 +16,9 @@ type gameState = {
   midCards: card[],
   topDiscard: card,
   opponentName: string,
-  opponentFields: fields}
+  opponentFields: fields,
+  stateName : gameStateName
+}
 
   // TODO: Add state name to state, propagate it down, differentiate display based on state
 
@@ -44,12 +47,16 @@ export default class Game extends React.Component<gameProps, gameState> {
       topDiscard: null,
       opponentName: "", 
       opponentFields: {1: "not_available", 2: "not_available", 3: "not_available"},
-      fields: {1: "not_available", 2: "not_available", 3: "not_available"}}
+      fields: {1: "not_available", 2: "not_available", 3: "not_available"}, 
+      stateName: "no_turn"
+    }
+      
   }
 
   gameStateUpdate(payload) {
     console.log(payload)
     this.setState({hand: payload.hand, fields: payload.field})
+    if(payload.state) {this.setState({stateName: payload.state})}
   }
 
   plantBean(fieldIndex: number) {
@@ -76,7 +83,7 @@ export default class Game extends React.Component<gameProps, gameState> {
       return (
         <div id="game">      
           <div id="opponent-area">
-            <PlayerField playerName={this.state.opponentName} fields={this.state.opponentFields}/>
+            <PlayerField playerName={this.state.opponentName} fields={this.state.opponentFields} stateName="no_turn"/>
           </div>
           <div id="mid-field">
             <DiscardPile top={this.state.topDiscard}/>
@@ -85,7 +92,7 @@ export default class Game extends React.Component<gameProps, gameState> {
           {/* <p onDoubleClick={() => this.props.backToLobby()}>try me</p> */}
           <div id="player-area">
             <Hand cards={this.state.hand} discardCard={(i) => this.discardCard(i)}/>
-            <PlayerField playerName={"Your"} fields={this.state.fields} plant={(i) => this.plantBean(i)}/>
+            <PlayerField playerName={"Your"} fields={this.state.fields} plant={(i) => this.plantBean(i)} stateName = {this.state.stateName}/>
           </div>
           <button onClick={() => this.pass()}>Pass</button>
         </div>)
@@ -102,12 +109,12 @@ class Hand extends React.Component<{cards: card[], discardCard: (number) => void
   }  
 }
 
-class PlayerField extends React.Component<{playerName: string, fields: fields, plant?: (number) => void}, {}> {
+class PlayerField extends React.Component<{playerName: string, fields: fields, plant?: (number) => void, stateName: gameStateName}, {}> {
 
   render() {    
     const fields = Object.keys(this.props.fields).map(
       (key) => { 
-        return <BeanField key={key} index={parseInt(key)} beans={this.props.fields[key]} plantOnField={(ind) => this.props.plant(ind)}/> 
+        return <BeanField key={key} index={parseInt(key)} beans={this.props.fields[key]} plantOnField={(ind) => this.props.plant(ind)} stateName={this.props.stateName}/> 
       }) 
     return (
     <div className="playing-field">
@@ -118,7 +125,7 @@ class PlayerField extends React.Component<{playerName: string, fields: fields, p
 }
 
 
-class BeanField extends React.Component<{beans: beanfield, index: number, plantOnField: (number) => void}, any> {
+class BeanField extends React.Component<{beans: beanfield, index: number, plantOnField: (number) => void, stateName : gameStateName}, any> {
 
   render() {
     if (this.props.beans === "not_available" ){
