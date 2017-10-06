@@ -26,5 +26,6 @@ defmodule PhoenanzaWeb.Router do
 
     resources "/users", UserController, except: [:edit]
     options "/users", UserController, :options
+    options "/users/new", UserController, :options
   end
 end
